@@ -24,6 +24,7 @@ import org.sonar.api.server.ws.WebService;
 import org.sonar.db.DbClient;
 import org.sonar.db.DbSession;
 import org.sonar.db.component.ComponentDto;
+import org.sonar.db.project.ProjectDto;
 import org.sonar.server.component.ComponentFinder;
 import org.sonar.server.user.UserSession;
 
@@ -55,9 +56,9 @@ public class DeleteBindingAction extends AlmSettingsWsAction {
     public void handle(Request request, Response response) {
         String projectKey = request.mandatoryParam(PARAM_PROJECT);
         try (DbSession dbSession = dbClient.openSession(false)) {
-            ComponentDto project = componentFinder.getByKey(dbSession, projectKey);
-            userSession.checkComponentPermission(ADMIN, project);
-            dbClient.projectAlmSettingDao().deleteByProject(dbSession, project);
+            ProjectDto projectDto = componentFinder.getProjectByKey(dbSession, projectKey);
+            userSession.checkProjectPermission(ADMIN, projectDto);
+            dbClient.projectAlmSettingDao().deleteByProject(dbSession, projectDto);
             dbSession.commit();
         }
 
